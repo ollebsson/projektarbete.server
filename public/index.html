@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Thread</title>
+
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.5/handlebars.min.js"></script>
+
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+	<link rel="stylesheet" type="text/css" href="/style.css">
+	<link href='https://fonts.googleapis.com/css?family=Electrolize|Shadows+Into+Light+Two' rel='stylesheet' type='text/css'>
+</head>
+	<body>
+		<div class="main">
+			<header>Forum</header>				
+			
+			
+			<div class="boxes">
+			    <div><b class="bold">id: </b> <input id="idOutput" class="userbox"></div>
+				<div><b class="bold">Title:</b> <input id="titleOutput" class="userbox"></div>
+				<div><b class="bold">Text:</b> <input id="textOutput" class="userbox"></div>
+
+				<button class="button" id="sendMessages">Post Thread</button>
+
+				<button class="button" id="deleteMessages">Delete Thread</button>
+
+				<button class="button" id="updateMessages">Update Thread</button>
+
+			</div>
+			<h1>
+				Threads :	
+			</h1>
+
+			<!-- <button class="button" id="getMessage">Get Comments</button><br><br>
+ -->
+			<p id="input" class="comments"></p>
+
+			<script type="text/javascript">
+
+			getMessages();
+				
+				
+				function sendMessages(){
+					$.ajax({
+					url: "/api/threads/",
+					method: 'POST',
+					data: {
+						id: document.getElementById("idOutput").value,
+					 title: document.getElementById("titleOutput").value, 
+					 text: document.getElementById("textOutput").value}
+				}).done(function(data){
+					console.log(data);
+					getMessages();
+				
+				});
+
+					
+
+				};				
+
+				function deleteMessages(){
+
+					var rawId = document.getElementById("idOutput");
+					var id = rawId.value;
+					console.log(id);
+					$.ajax({
+						url: "/api/threads/" + id,
+						method: "DELETE"
+
+					}).done(function(data){
+
+						alert('Deleted!');
+						getMessages();
+
+					});
+				};
+				
+				function getMessages(){
+			
+				$.ajax({
+				
+				  url: "/api/threads",
+				
+				}).done(function(data) 
+				{
+			
+					if(data.threads.length <= 0){
+						document.getElementById("input").innerHTML = "No more threads";
+						console.log("Error");
+						
+					} else {
+
+						console.log(data);
+				
+					document.getElementById("input").innerHTML = "";
+
+					var a, linkText, data;
+						
+						for(var i = 0; i < data.threads.length; i++){
+							dataId = data.threads[i].id;
+							dataText = data.threads[i].text;
+							dataTitle = data.threads[i].title;
+							a = document.createElement('a');
+							linkText = document.createTextNode("Link");
+							a.appendChild(linkText);
+							a.href = 'http://localhost:3000/api/threads/' + dataId;
+							
+					document.getElementById("input").innerHTML +=
+					"<div>" + "<b>" + dataId + "</b>" + ". "  + "<b>" +
+					dataTitle + "</b>" + "<b>" + " : " + "</b>" + dataText + "." + "</div>";
+					 document.getElementById("input").appendChild(a)
+
+
+					}
+					document.getElementById('idOutput').value = "";
+					document.getElementById('titleOutput').value = "";
+					document.getElementById('textOutput').value = "";
+
+				}
+			});
+		};
+
+				function updateMessages(){
+					var rawId = document.getElementById("idOutput");
+					var id = rawId.value;
+					$.ajax({
+						url: "/api/threads/" + id,
+						method: "PUT",
+						data: {id: document.getElementById("idOutput").value, 
+							title: document.getElementById("titleOutput").value, 
+							text: document.getElementById("textOutput").value}
+					}).done(function(data){
+
+						alert("updated");
+						getMessages();
+						
+					});
+				}
+
+			
+
+				document.getElementById('updateMessages').addEventListener('click', updateMessages);
+				document.getElementById('sendMessages').addEventListener('click', sendMessages); 
+				document.getElementById('deleteMessages').addEventListener('click', deleteMessages);
+			
+
+			</script>
+
+
+
+		</div>
+	</body>
+</html>
